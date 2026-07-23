@@ -1,0 +1,40 @@
+# =============================================================================
+# 0003-kernel_makefile.patch — compile kernel/sys_hello.c into the kernel image.
+# =============================================================================
+#
+# WHAT THIS DOES
+# --------------
+# kernel/Makefile is the Kbuild makefile for the core kernel/ directory. Kbuild
+# builds exactly the object files listed in `obj-y` (always built into the
+# vmlinux image) and `obj-m` (built as loadable modules). Our new source file
+# kernel/sys_hello.c will be ignored unless we add its object to a build list.
+#
+# We use `obj-y` (NOT `obj-m`): a syscall CANNOT be a loadable module, because
+# sys_call_table[] is a fixed array linked into the kernel image at build time.
+# There is no supported way for a module to add a table entry, so the code that
+# implements a new syscall must be compiled INTO the kernel. That constraint is
+# the entire reason this project ships as a kernel patch instead of a .ko.
+#
+# ORDER MATTERS: the line must come AFTER the initial `obj-y = fork.o ...`
+# assignment. That assignment uses `=`, which RESETS obj-y; a `+=` placed before
+# it would be wiped out. Anywhere after the assignment works — the exact spot in
+# this diff is not important.
+#
+# APPLYING (from the kernel tree root):
+#     git apply /path/to/0003-kernel_makefile.patch
+#   If the surrounding context has drifted in your kernel version (this tail
+#   list changes between releases), just add the one line
+#       obj-y += sys_hello.o
+#   anywhere after the `obj-y = fork.o ...` block in kernel/Makefile by hand.
+# =============================================================================
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -10,6 +10,8 @@ obj-y     = fork.o exec_domain.o panic.o \
+ 	    notifier.o ksysfs.o cred.o reboot.o \
+ 	    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o
+
++obj-y += sys_hello.o
++
+ obj-$(CONFIG_USERMODE_DRIVER) += usermode_driver.o
+ obj-$(CONFIG_MODULES) += kmod.o
+ obj-$(CONFIG_MULTIUSER) += groups.o

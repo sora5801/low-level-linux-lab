@@ -1,0 +1,47 @@
+# =============================================================================
+# 0001-syscall_64_tbl.patch — register the number for our new syscall.
+# =============================================================================
+#
+# WHAT THIS DOES
+# --------------
+# arch/x86/entry/syscalls/syscall_64.tbl is the master list that maps a syscall
+# NUMBER to its entry-point function. At build time the script
+# arch/x86/entry/syscalls/syscalltbl.sh turns this table into two generated
+# artifacts:
+#   * arch/x86/include/generated/asm/syscalls_64.h  -> the sys_call_table[]
+#     array the CPU's entry_SYSCALL_64 trampoline indexes with %rax;
+#   * arch/x86/include/generated/uapi/asm/unistd_64.h -> the __NR_* #defines
+#     that userspace headers expose.
+# Adding one line here is what actually allocates syscall number 463.
+#
+# THE FORMAT (from the file's own header comment):
+#     <number>  <abi>  <name>  <entry point>
+#   - abi "common" = available to both the 64-bit and x32 ABIs (what we want).
+#   - the entry-point column is written WITHOUT the __x64_ prefix: the build
+#     machinery adds it, so `sys_hello` here resolves to __x64_sys_hello, the
+#     wrapper SYSCALL_DEFINE2(hello, ...) generates in kernel/sys_hello.c.
+#
+# CHOOSING THE NUMBER
+#   463 is the first free slot as of Linux 6.10 (462 = mseal was the last). The
+#   number MUST be below 512 — numbers 512..547 are reserved for x32-only
+#   syscalls further down this same file. Pick the next free integer in YOUR
+#   tree: `tail arch/x86/entry/syscalls/syscall_64.tbl`. It is nothing more than
+#   the index into sys_call_table[]; there is no magic to it.
+#
+# APPLYING
+#   From the root of your kernel source tree:
+#     git apply /path/to/0001-syscall_64_tbl.patch
+#   or, if the line numbers/context have drifted in your version:
+#     patch -p1 --fuzz=3 < /path/to/0001-syscall_64_tbl.patch
+#   or simply add the single `463 common hello sys_hello` line by hand.
+# =============================================================================
+--- a/arch/x86/entry/syscalls/syscall_64.tbl
++++ b/arch/x86/entry/syscalls/syscall_64.tbl
+@@ -381,6 +381,7 @@
+ 460	common	lsm_set_self_attr	sys_lsm_set_self_attr
+ 461	common	lsm_list_modules	sys_lsm_list_modules
+ 462	common	mseal			sys_mseal
++463	common	hello			sys_hello
+
+ #
+ # Due to a historical design error, certain syscalls are numbered differently

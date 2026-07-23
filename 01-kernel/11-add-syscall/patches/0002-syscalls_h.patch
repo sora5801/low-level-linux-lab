@@ -1,0 +1,41 @@
+# =============================================================================
+# 0002-syscalls_h.patch — declare the C prototype for sys_hello.
+# =============================================================================
+#
+# WHAT THIS DOES
+# --------------
+# include/linux/syscalls.h holds the `asmlinkage long sys_*(...)` prototype for
+# every syscall in the kernel. Even though SYSCALL_DEFINE2() in
+# kernel/sys_hello.c generates the real entry symbols (__x64_sys_hello etc.),
+# the generic prototype must still be declared here so that:
+#   * other kernel code can reference sys_hello with a correct type, and
+#   * the cross-checking the build does between the table and the definitions
+#     has a prototype to match against.
+#
+# `asmlinkage` tells the compiler this function's arguments arrive per the
+# arch's assembly entry convention rather than the normal C register order —
+# the syscall entry stub in assembly is what calls it. `__user` marks `buf` as a
+# userspace pointer so `sparse` (make C=1) will flag any code that dereferences
+# it directly instead of going through copy_to_user() — a free static check
+# against the exact class of bug that makes syscalls dangerous.
+#
+# The prototype's argument types MUST match the SYSCALL_DEFINE2 in
+# kernel/sys_hello.c:  (char __user *buf, size_t len).
+#
+# PLACEMENT: anywhere in the big prototype block is fine; we drop it next to
+# sys_mseal (the neighbouring recent syscall) purely for tidiness.
+#
+# APPLYING (from the kernel tree root):
+#     git apply /path/to/0002-syscalls_h.patch
+#   or add the single `asmlinkage long sys_hello(...)` line by hand.
+# =============================================================================
+--- a/include/linux/syscalls.h
++++ b/include/linux/syscalls.h
+@@ -834,6 +834,7 @@ asmlinkage long sys_cachestat(unsigned int fd,
+ 			      struct cachestat __user *cstat, unsigned int flags);
+ asmlinkage long sys_map_shadow_stack(unsigned long addr, unsigned long size, unsigned int flags);
+ asmlinkage long sys_mseal(unsigned long start, size_t len, unsigned long flags);
++asmlinkage long sys_hello(char __user *buf, size_t len);
+
+ /*
+  * Architecture-specific system calls
