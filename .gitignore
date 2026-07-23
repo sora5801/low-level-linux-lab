@@ -1,0 +1,47 @@
+# Build artifacts ------------------------------------------------------------
+# We intentionally COMMIT the *.s assembly files (they are teaching material),
+# but ignore the binaries, objects, and kernel-module leftovers they build into.
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.cmd
+*.order
+*.symvers
+*.a
+*.so
+*.so.*
+*.out
+*.elf
+*.bin
+*.img
+*.lock
+.tmp_versions/
+modules.builtin*
+
+# Executables (no extension on Linux). Keep source + asm, drop the compiled bin.
+# Per-project Makefiles emit into ./build/ or ./bin/ which we ignore wholesale.
+build/
+bin/
+target/
+
+# BUT: never ignore the committed teaching assembly under any asm/ directory.
+!**/asm/
+!**/asm/**
+
+# Editor / OS noise -----------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Core dumps & sanitizer / fuzzer output --------------------------------------
+core
+core.*
+vgcore.*
+*.log
+crash-*
+fuzz-corpus/
