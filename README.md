@@ -21,6 +21,25 @@ Every project is self-contained in its own directory and ships:
 > ship their blue-team detector where the list calls for one — that half is the
 > more instructive build.
 
+## Build status
+
+This lab is being built out incrementally. Current state:
+
+| Section | Built | Total |
+|---------|:-----:|:-----:|
+| 1. Kernel, drivers & modules | 15 | 15 ✅ |
+| 2. Systems tools & utilities | 8 | 19 |
+| 3. Networking & concurrency | 0 | 14 |
+| 4. Security, RE & assembly | 1 | 12 |
+| 5. Capstones | 0 | 5 |
+| **Total** | **24** | **65** |
+
+Projects not yet listed as built have their directory scaffolded but no source
+yet. Directories with a `README.md` are complete and runnable (Linux/WSL/QEMU
+as noted). The remaining projects are generated in batches; each is committed
+only once it is complete and consistent (source + README + Makefile + annotated
+assembly).
+
 ## How to use it
 
 1. Pick a project. `cd` into its directory. Read its `README.md`.
