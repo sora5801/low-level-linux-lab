@@ -1,0 +1,53 @@
+; ===========================================================================
+; example.com.zone — a sample master file for the authoritative server.
+; ===========================================================================
+; Syntax notes (see src/zone.c for exactly what the parser accepts):
+;   - ';' begins a comment to end of line.
+;   - $ORIGIN sets the suffix appended to names that do NOT end in a dot.
+;   - $TTL sets the default TTL for records that omit one.
+;   - '@' means the origin itself (the zone apex).
+;   - A blank owner (line begins with whitespace) inherits the previous owner.
+;   - A name ending in '.' is absolute (fully qualified); otherwise it is
+;     relative to $ORIGIN.
+;   - '( ... )' lets one record's RDATA span multiple lines (used for SOA).
+; ===========================================================================
+
+$ORIGIN example.com.
+$TTL 3600
+
+; ---- Start Of Authority: zone-apex metadata + negative-answer TTL ----------
+; Fields: <primary-ns> <admin-email> ( serial refresh retry expire minimum )
+; 'minimum' doubles as the TTL a resolver caches NXDOMAIN/NODATA answers for.
+@       IN  SOA ns1.example.com. admin.example.com. (
+                2024010101   ; serial  — bump on every edit
+                7200         ; refresh — secondary re-check interval
+                3600         ; retry   — secondary retry after a failed refresh
+                1209600      ; expire  — give up being authoritative after this
+                86400 )      ; minimum — negative-cache TTL
+
+; ---- Delegation: the zone's own name servers -------------------------------
+@       IN  NS  ns1.example.com.
+@       IN  NS  ns2.example.com.
+
+; ---- Addresses at the apex -------------------------------------------------
+@       IN  A     192.0.2.1
+@       IN  AAAA  2001:db8::1
+
+; ---- Name servers (their own A records are "glue") -------------------------
+ns1     IN  A     192.0.2.53
+ns2     IN  A     192.0.2.54
+
+; ---- Ordinary hosts --------------------------------------------------------
+www     IN  A     192.0.2.80
+www     IN  AAAA  2001:db8::80
+; 'ftp' is an alias for 'www' — a CNAME. A query for ftp A returns the CNAME
+; plus (because they're in the same zone) the target's A record.
+ftp     IN  CNAME www
+; TTL override: this record lives only 300s regardless of $TTL.
+short   300  IN  A  192.0.2.90
+
+; ---- Mail: MX has a preference (lower is preferred) ------------------------
+@       IN  MX  10 mail.example.com.
+@       IN  MX  20 mail2.example.com.
+mail    IN  A     192.0.2.25
+mail2   IN  A     192.0.2.26

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>c10k-teach</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem; }
+    code { background: #f0f0f0; padding: 0.1em 0.3em; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>c10k-teach is serving you</h1>
+  <p>
+    This page arrived over an <code>epoll</code> edge-triggered, non-blocking,
+    single-thread-per-core HTTP/1.1 server, and its body was streamed to your
+    socket with <code>sendfile()</code> — zero copies through user space.
+  </p>
+  <p>
+    The request line and headers were parsed by a byte-at-a-time state machine
+    that tolerates partial reads. See <code>http_parser.c</code>.
+  </p>
+</body>
+</html>
