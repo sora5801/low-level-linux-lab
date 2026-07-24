@@ -1,0 +1,27 @@
+# start.disasm.txt — GENUINE encoded bytes of the _start star artifact.
+#
+# Produced (not fabricated) by:
+#   clang --target=x86_64-pc-linux-gnu -c src/start.S -o start.o
+#   objdump -dr -M att start.o
+#
+# The zeroed displacements on the lea/call are placeholders the LINKER
+# fills via the relocations shown (R_X86_64_PC32/PLT32): main and
+# __libc_start_main are external symbols resolved when the program links.
+# ============================================================================
+
+
+C:/Users/sora5/AppData/Local/Temp/claude/C--Users-sora5-Linux-System/74515a45-3c3d-4409-b0bc-a9e77e86efb5/scratchpad/start.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <_start>:
+   0:	31 ed                	xor    %ebp,%ebp
+   2:	48 8b 34 24          	mov    (%rsp),%rsi
+   6:	48 8d 54 24 08       	lea    0x8(%rsp),%rdx
+   b:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 12 <_start+0x12>
+			e: R_X86_64_PC32	main-0x4
+  12:	48 83 e4 f0          	and    $0xfffffffffffffff0,%rsp
+  16:	e8 00 00 00 00       	call   1b <_start+0x1b>
+			17: R_X86_64_PLT32	__libc_start_main-0x4
+  1b:	0f 0b                	ud2

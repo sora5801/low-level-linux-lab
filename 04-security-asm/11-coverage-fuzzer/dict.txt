@@ -1,0 +1,16 @@
+# dict.txt — an AFL-style dictionary for the FZR1 target.
+#
+# A dictionary feeds the fuzzer domain knowledge it would otherwise have to
+# discover byte by byte: magic values, keywords, structural constants. Each
+# line is  name="token"  with \xHH escapes, or a bare token. The mutator splices
+# these in (see mutate_havoc cases 13/14 in fuzzer.c).
+#
+# NOTE: the coverage feedback finds the magic on its OWN, one byte at a time,
+# even with this file removed — try `./fuzzer ./parser seeds out` (no dict) and
+# watch it still climb the ladder. The dictionary just makes it near-instant.
+
+magic="FZR1"          # the 4-byte record magic — the whole ladder in one token
+type_name="\x01"      # record type 1 -> the vulnerable parse_name() path
+type_blob="\x02"      # record type 2 -> the safe parse_blob() path
+big_len="\xff"        # a length byte guaranteed to overflow the 16-byte buffer
+header="FZR1\x01\x40" # magic + type 1 + length 0x40 (64) — a ready-made trigger
