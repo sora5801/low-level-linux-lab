@@ -1,0 +1,80 @@
+// ===========================================================================
+// demo.lox — a tour of everything the VM implements. Run with:  ./lvm examples/demo.lox
+// ===========================================================================
+// The language is an integer-valued dialect of Lox (Crafting Interpreters).
+// Numbers are 64-bit signed integers; there are no floats.
+
+// --- globals, arithmetic, operator precedence ------------------------------
+var a = 2;
+var b = 3;
+print a + b * 4;        // 14  (precedence: * before +)
+print (a + b) * 4;      // 20  (grouping overrides it)
+print 7 / 2;            // 3   (integer/truncating division)
+print -a * -b;          // 6   (unary minus)
+
+// --- booleans, comparisons, logical operators (short-circuit) --------------
+print a < b;            // true
+print a == 2 and b == 3;// true
+print false or a > 0;   // true
+print !false;           // true
+
+// --- strings and concatenation ("+" is overloaded) -------------------------
+var name = "world";
+print "hello, " + name + "!";   // hello, world!
+
+// --- blocks and LOCAL variables (lexical scope) ----------------------------
+{
+  var x = 10;
+  var y = 20;
+  {
+    var x = 99;          // shadows the outer x within this inner block
+    print x + y;         // 119
+  }
+  print x + y;           // 30  (inner x is gone)
+}
+
+// --- if / else -------------------------------------------------------------
+if (a + b == 5) print "five"; else print "not five";   // five
+
+// --- while loop ------------------------------------------------------------
+var i = 0;
+var sum = 0;
+while (i < 5) {
+  sum = sum + i;
+  i = i + 1;
+}
+print sum;              // 10  (0+1+2+3+4)
+
+// --- for loop (desugars to while with jumps) -------------------------------
+var fact = 1;
+for (var n = 1; n <= 5; n = n + 1) {
+  fact = fact * n;
+}
+print fact;            // 120  (5!)
+
+// --- functions, parameters, and RECURSION (call frames) --------------------
+fun fib(n) {
+  if (n < 2) return n;
+  return fib(n - 1) + fib(n - 2);
+}
+print fib(20);         // 6765
+
+// --- functions are first-class values --------------------------------------
+fun makeGreeting(who) {
+  return "hi " + who;
+}
+print makeGreeting("VM");   // hi VM
+
+// --- exercise the garbage collector: allocate many short-lived strings so the
+// heap grows past the GC threshold and a collection actually runs. If any root
+// were missing, this loop would crash under `make gc-test` (which forces a
+// collection on every allocation).
+fun churn(count) {
+  var s = "";
+  for (var k = 0; k < count; k = k + 1) {
+    s = "x";           // each iteration allocates a fresh 1-char string
+  }
+  return s;
+}
+print churn(1000);     // x
+print "done";
