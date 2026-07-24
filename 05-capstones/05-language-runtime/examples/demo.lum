@@ -1,0 +1,79 @@
+// ===========================================================================
+// demo.lum — the teaching-core smoke test. Exercises arithmetic, variables,
+// scoping, control flow, functions/recursion, and string+GC churn.
+// Run with:  make run        (or)  ./lumen examples/demo.lum
+// ===========================================================================
+
+print "== arithmetic (precedence & grouping) ==";
+print 1 + 2 * 3 - 4 / 2;        // 1 + 6 - 2 = 5
+print (1 + 2) * 3;              // 9
+print -(3 * 3) + 10;           // 1
+
+print "== variables, comparison, logic ==";
+var a = 10;
+var b = 4;
+print a - b;                   // 6
+print a < b;                   // false
+print a >= b and b > 0;        // true
+print a < b or b == 4;         // true
+
+print "== block scoping ==";
+var x = "global";
+{
+  var x = "inner";             // shadows the global inside this block
+  print x;                     // inner
+}
+print x;                       // global
+
+print "== recursion: fib(10) ==";
+fun fib(n) {
+  if (n < 2) return n;
+  return fib(n - 1) + fib(n - 2);
+}
+print fib(10);                 // 55
+
+print "== iteration: the hot loop (also JIT-compiled: ./lumen --jit-demo) ==";
+fun sumTo(n) {
+  var acc = 0;
+  var i = 1;
+  while (i <= n) {
+    acc = acc + i;
+    i = i + 1;
+  }
+  return acc;
+}
+print sumTo(100);              // 5050
+
+print "== for loop ==";
+var total = 0;
+for (var i = 0; i < 5; i = i + 1) {
+  total = total + i;
+}
+print total;                   // 0+1+2+3+4 = 10
+
+print "== strings + garbage collection ==";
+fun repeat(s, n) {
+  var out = "";
+  var i = 0;
+  while (i < n) {               // each concat allocates a NEW string object
+    out = out + s;
+    i = i + 1;
+  }
+  return out;
+}
+print repeat("ab", 6);         // abababababab
+
+// Churn: every iteration builds a fresh string that dies immediately. The
+// mark-sweep GC reclaims the garbage; `make gc-test` collects on EVERY alloc to
+// prove the root set is complete.
+fun churn(rounds) {
+  var i = 0;
+  while (i < rounds) {
+    var junk = repeat("x", 12); // allocated, used as a local, then discarded
+    i = i + 1;
+  }
+  return rounds;
+}
+print churn(500);              // 500  (after generating ~500 dead strings)
+
+print "== done ==";
